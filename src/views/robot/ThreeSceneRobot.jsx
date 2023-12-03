@@ -19,21 +19,18 @@ const ThreeSceneRobot = () => {
     let previousAction = useRef(null);
     let stats = useRef(null);
     let clock = useRef(new THREE.Clock());
-    let loaded = useRef(false)
+    let loaded = useRef(false);
     const api = {state: "Walking"};
 
     useEffect(() => {
         init();
         animate();
-
-        console.log(container, gui, camera, scene, renderer, model, face , mixer, actions, activeAction,
-            previousAction, stats, clock)
         return () => {
             if (container.current) {
                 container.current.removeChild(renderer.current.domElement);
             }
         };
-    }, [renderer]);
+    }, []);
 
     const init = () => {
         container.current = document.createElement("div");
@@ -58,10 +55,9 @@ const ThreeSceneRobot = () => {
         dirLight.position.set(0, 20, 10);
         scene.current.add(dirLight);
 
-        const mesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(2000, 2000),
-            new THREE.MeshPhongMaterial({color: 0xcbcbcb, depthWrite: false}),
-        );
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshPhongMaterial({
+            color: 0xcbcbcb, depthWrite: false,
+        }));
         mesh.rotation.x = -Math.PI / 2;
         scene.current.add(mesh);
 
@@ -71,17 +67,17 @@ const ThreeSceneRobot = () => {
         scene.current.add(grid);
 
         const loader = new GLTFLoader();
-        const filePath = "/models/" + "RobotExpressive.glb"
-        loader.load( filePath, function ( gltf ) {
+        const filePath = "/models/RobotExpressive.glb";
+        loader.load(filePath, function (gltf) {
             model.current = gltf.scene;
             scene.current.add(model.current);
 
             createGUI(model.current, gltf.animations);
 
-        }, undefined, function ( e ) {
-            console.error( e );
+        }, undefined, function (e) {
+            console.error(e);
 
-        } );
+        });
 
         renderer.current = new THREE.WebGLRenderer({antialias: true});
         renderer.current.setPixelRatio(window.devicePixelRatio);
