@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -19,12 +19,14 @@ const ThreeSceneRobot = () => {
     let previousAction = useRef(null);
     let stats = useRef(null);
     let clock = useRef(new THREE.Clock());
-    let loaded = useRef(false);
     const api = {state: "Walking"};
+    const [ modelPosition, setModelPosition ] = useState({x: 0, y: 0, z: 0});
 
     useEffect(() => {
         init();
         animate();
+        document.addEventListener("click", onMouseClick);
+
         return () => {
             if (container.current) {
                 container.current.removeChild(renderer.current.domElement);
@@ -32,17 +34,27 @@ const ThreeSceneRobot = () => {
         };
     }, []);
 
+    useEffect(() => {
+        if (model.current) {
+            model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
+        }
+    }, [modelPosition]);
+
+
     const init = () => {
         container.current = document.createElement("div");
         document.body.appendChild(container.current);
 
+
+
         camera.current = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 100);
-        camera.current.position.set(-5, 3, 10);
-        camera.current.lookAt(0, 2, 0);
+        camera.current.position.set(20, 30, 50); // 일단 냅두기?
+        // camera.current.lookAt(0, 2, 20);
+        camera.current.lookAt(0, 0, 0);
 
         scene.current = new THREE.Scene();
         scene.current.background = new THREE.Color(0xe0e0e0);
-        scene.current.fog = new THREE.Fog(0xe0e0e0, 20, 100);
+        // scene.current.fog = new THREE.Fog(0xe0e0e0, 20, 100);
 
         clock.current = new THREE.Clock();
 
@@ -55,11 +67,11 @@ const ThreeSceneRobot = () => {
         dirLight.position.set(0, 20, 10);
         scene.current.add(dirLight);
 
-        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshPhongMaterial({
-            color: 0xcbcbcb, depthWrite: false,
-        }));
-        mesh.rotation.x = -Math.PI / 2;
-        scene.current.add(mesh);
+        // const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshPhongMaterial({
+        //     color: 0xcbcbcb, depthWrite: false,
+        // }));
+        // mesh.rotation.x = -Math.PI / 2;
+        // scene.current.add(mesh);
 
         const grid = new THREE.GridHelper(200, 40, 0x000000, 0x000000);
         grid.material.opacity = 0.2;
@@ -73,6 +85,9 @@ const ThreeSceneRobot = () => {
             scene.current.add(model.current);
 
             createGUI(model.current, gltf.animations);
+            if (model.current) {
+                model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
+            }
 
         }, undefined, function (e) {
             console.error(e);
@@ -80,9 +95,11 @@ const ThreeSceneRobot = () => {
         });
 
         renderer.current = new THREE.WebGLRenderer({antialias: true});
-        renderer.current.setPixelRatio(window.devicePixelRatio);
+        // renderer.current.setPixelRatio(window.devicePixelRatio);
         renderer.current.setSize(window.innerWidth, window.innerHeight);
         container.current.appendChild(renderer.current.domElement);
+
+
 
         window.addEventListener("resize", onWindowResize);
 
@@ -95,6 +112,7 @@ const ThreeSceneRobot = () => {
         const emotes = [ "Jump", "Yes", "No", "Wave", "Punch", "ThumbsUp" ];
 
         gui.current = new GUI();
+
 
         mixer.current = new THREE.AnimationMixer(model);
 
@@ -148,7 +166,6 @@ const ThreeSceneRobot = () => {
         emoteFolder.open();
 
         // expressions
-
         face.current = model.getObjectByName("Head_4");
 
         const expressions = Object.keys(face.current.morphTargetDictionary);
@@ -195,6 +212,18 @@ const ThreeSceneRobot = () => {
         if (renderer.current) renderer.current.render(scene.current, camera.current);
 
         if (stats.current) stats.current.update();
+    };
+
+
+    const onMouseClick = (event) => {
+        setModelPosition((prevPosition) => ({
+            x: prevPosition.x, // Adjust the position change as needed
+            y: prevPosition.y,
+            z: prevPosition.z + 5,
+        }));
+        console.log("Clicked:: ", modelPosition)
+        // scene.current.add(model.current);
+        // renderer.current.render(scene.current, camera.current);
     };
 
     return <></>;
