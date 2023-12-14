@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {memo} from 'react';
 import '../assets/App.scss';
-import RobotContainer from "./robot/RobotContainer";
-function App() {
+import {RobotContainer} from "./robot/RobotContainer";
+export const App = memo(() => {
     return (
         <div className="App">
             <div className="app-header">
@@ -12,7 +12,7 @@ function App() {
             </div>
             {/*<div className="app-footer"></div>*/}
         </div>
-    );
-}
 
-export default App;
+    );
+})
+

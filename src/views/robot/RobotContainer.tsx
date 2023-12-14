@@ -1,21 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import './RobotContainer.scss';
-// import ThreeScene from "./ThreeScene";
-import ThreeSceneRobot from "./ThreeSceneRobot"
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
+import React, {memo, useMemo} from 'react';
+import {ThreeSceneRobot} from "./component/ThreeSceneRobot"
 
 
-function App() {
+export const RobotContainer =  memo(() => {
     return (
         <div className="robot-container">
-            {/*<ThreeScene/>*/}
             <ThreeSceneRobot/>
         </div>
     );
-}
+})
 
 
 
-export default App;

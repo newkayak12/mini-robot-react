@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {memo, useEffect, useRef, useState} from "react";
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import Stats from "three/addons/libs/stats.module.js";
 
-const ThreeSceneRobot = () => {
+export const ThreeSceneRobot = memo(() => {
     let container = useRef(null);
     let gui = useRef(null);
     let camera = useRef(null);
@@ -33,7 +33,6 @@ const ThreeSceneRobot = () => {
             }
         };
     }, []);
-
     useEffect(() => {
         if (model.current) {
             model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
@@ -42,7 +41,7 @@ const ThreeSceneRobot = () => {
 
 
     const init = () => {
-        container.current = document.createElement("div");
+        container.current = document.getElementById("robot-canvas");
         document.body.appendChild(container.current);
 
 
@@ -180,8 +179,6 @@ const ThreeSceneRobot = () => {
 
         expressionFolder.open();
     };
-
-
     const fadeToAction = (name, duration) => {
         previousAction.current = activeAction.current;
         activeAction.current = actions.current[name];
@@ -192,8 +189,6 @@ const ThreeSceneRobot = () => {
 
         activeAction.current.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(duration).play();
     };
-
-
     const onWindowResize = () => {
         camera.current.aspect = window.innerWidth / window.innerHeight;
         camera.current.updateProjectionMatrix();
@@ -201,7 +196,6 @@ const ThreeSceneRobot = () => {
         if (renderer.current) renderer.current.setSize(window.innerWidth, window.innerHeight);
 
     };
-
     const animate = () => {
         const dt = clock.current.getDelta();
 
@@ -213,8 +207,6 @@ const ThreeSceneRobot = () => {
 
         if (stats.current) stats.current.update();
     };
-
-
     const onMouseClick = (event) => {
         setModelPosition((prevPosition) => ({
             x: prevPosition.x, // Adjust the position change as needed
@@ -226,9 +218,11 @@ const ThreeSceneRobot = () => {
         // renderer.current.render(scene.current, camera.current);
     };
 
-    return <></>;
+    return(
+        <>
+             <div id={"robot-canvas"}></div>
+        </>
+    )
+});
 
-};
 
-
-export default ThreeSceneRobot;
