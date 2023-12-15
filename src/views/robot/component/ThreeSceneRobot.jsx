@@ -42,7 +42,6 @@ export const ThreeSceneRobot = memo(() => {
 
     const init = () => {
         container.current = document.getElementById("robot-canvas");
-        document.body.appendChild(container.current);
 
 
 
@@ -66,11 +65,6 @@ export const ThreeSceneRobot = memo(() => {
         dirLight.position.set(0, 20, 10);
         scene.current.add(dirLight);
 
-        // const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshPhongMaterial({
-        //     color: 0xcbcbcb, depthWrite: false,
-        // }));
-        // mesh.rotation.x = -Math.PI / 2;
-        // scene.current.add(mesh);
 
         const grid = new THREE.GridHelper(200, 40, 0x000000, 0x000000);
         grid.material.opacity = 0.2;
