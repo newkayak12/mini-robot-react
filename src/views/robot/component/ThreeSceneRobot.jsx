@@ -1,7 +1,8 @@
 import React, {memo, useEffect, useRef, useState} from "react";
-
+import {perspectiveCamera, initializeScene} from "./three/Scene";
+import {createRobot} from "./three/Robot";
+import {initializeRenderer} from "./three/Renderer";
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import Stats from "three/addons/libs/stats.module.js";
 
@@ -11,7 +12,7 @@ export const ThreeSceneRobot = memo(() => {
     let camera = useRef(null);
     let scene = useRef(null);
     let renderer = useRef(null);
-    let model = useRef(null);
+    let model = useRef([]);
     let face = useRef(null);
     let mixer = useRef(null);
     let actions = useRef({});
@@ -23,7 +24,7 @@ export const ThreeSceneRobot = memo(() => {
     const [ modelPosition, setModelPosition ] = useState({x: 0, y: 0, z: 0});
 
     useEffect(() => {
-        init();
+        initialize();
         animate();
         document.addEventListener("click", onMouseClick);
 
@@ -34,72 +35,48 @@ export const ThreeSceneRobot = memo(() => {
         };
     }, []);
     useEffect(() => {
-        if (model.current) {
-            model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
-        }
+        // if (model.current) {
+        //     model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
+        // }
     }, [modelPosition]);
 
 
-    const init = () => {
+
+    const initialize =  async () => {
         container.current = document.getElementById("robot-canvas");
-
-
-
-        camera.current = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 100);
-        camera.current.position.set(20, 30, 50); // 일단 냅두기?
-        // camera.current.lookAt(0, 2, 20);
-        camera.current.lookAt(0, 0, 0);
-
-        scene.current = new THREE.Scene();
-        scene.current.background = new THREE.Color(0xe0e0e0);
-        // scene.current.fog = new THREE.Fog(0xe0e0e0, 20, 100);
-
+        scene.current = initializeScene()
+        camera.current = perspectiveCamera
         clock.current = new THREE.Clock();
 
-        // lights
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 3);
-        hemiLight.position.set(0, 20, 0);
-        scene.current.add(hemiLight);
-
-        const dirLight = new THREE.DirectionalLight(0xffffff, 3);
-        dirLight.position.set(0, 20, 10);
-        scene.current.add(dirLight);
+        await addRobot()
 
 
-        const grid = new THREE.GridHelper(200, 40, 0x000000, 0x000000);
-        grid.material.opacity = 0.2;
-        grid.material.transparent = true;
-        scene.current.add(grid);
-
-        const loader = new GLTFLoader();
-        const filePath = "/models/RobotExpressive.glb";
-        loader.load(filePath, function (gltf) {
-            model.current = gltf.scene;
-            scene.current.add(model.current);
-
-            createGUI(model.current, gltf.animations);
-            if (model.current) {
-                model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
-            }
-
-        }, undefined, function (e) {
-            console.error(e);
-
-        });
-
-        renderer.current = new THREE.WebGLRenderer({antialias: true});
-        // renderer.current.setPixelRatio(window.devicePixelRatio);
-        renderer.current.setSize(window.innerWidth, window.innerHeight);
+        renderer.current = initializeRenderer()
+        window.addEventListener("resize", onWindowResize);
         container.current.appendChild(renderer.current.domElement);
 
 
 
-        window.addEventListener("resize", onWindowResize);
+
 
         // stats
         stats.current = new Stats();
         container.current.appendChild(stats.current.dom);
     };
+    const addRobot = async () => {
+        const modelTmp = await createRobot()
+        model.current = [...model.current, modelTmp]
+        scene.current.add(modelTmp)
+
+    }
+    const onWindowResize = () => {
+        camera.current.aspect = window.innerWidth / window.innerHeight;
+        camera.current.updateProjectionMatrix();
+
+        if (renderer.current) renderer.current.setSize(window.innerWidth, window.innerHeight);
+
+    };
+
     const createGUI = (model, animations) => {
         const states = [ "Idle", "Walking", "Running", "Dance", "Death", "Sitting", "Standing" ];
         const emotes = [ "Jump", "Yes", "No", "Wave", "Punch", "ThumbsUp" ];
@@ -182,13 +159,6 @@ export const ThreeSceneRobot = memo(() => {
         }
 
         activeAction.current.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(duration).play();
-    };
-    const onWindowResize = () => {
-        camera.current.aspect = window.innerWidth / window.innerHeight;
-        camera.current.updateProjectionMatrix();
-
-        if (renderer.current) renderer.current.setSize(window.innerWidth, window.innerHeight);
-
     };
     const animate = () => {
         const dt = clock.current.getDelta();

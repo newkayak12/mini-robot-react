@@ -1,5 +1,5 @@
 import * as THREE from "three";
-let perspectiveCamera
+export let perspectiveCamera
 let hemiLight
 let dirLight
 let grid
@@ -30,8 +30,11 @@ const initializeGrid = (() =>  {
 
     return grid
 })
+const setBackground = (() => {
+    scene.background = new THREE.Color(0xe0e0e0);
+})
 
-const initializeScene = () => {
+export const initializeScene = () => {
     if(!scene) scene = new THREE.Scene();
     if(!perspectiveCamera) {
         perspectiveCamera = initializePerspectiveCamera()
@@ -49,6 +52,9 @@ const initializeScene = () => {
         grid = initializeGrid();
         scene.add(grid)
     }
+
+
+    setBackground()
 
     return scene;
 }
