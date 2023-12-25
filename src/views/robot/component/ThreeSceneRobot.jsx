@@ -1,11 +1,15 @@
 import React, {memo, useEffect, useRef, useState} from "react";
 import {perspectiveCamera, initializeScene} from "./three/Scene";
-import {createRobot} from "./three/Robot";
+import {createRobotAndPlaceAt} from "./three/Robot";
 import {initializeRenderer} from "./three/Renderer";
 import * as THREE from "three";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import {addClickEventListener, addWindowResizeEventListener} from './three/EventListner'
 import Stats from "three/addons/libs/stats.module.js";
+import * as YUKA from 'yuka'
 
+
+const vehicle = new YUKA.Vehicle()
 export const ThreeSceneRobot = memo(() => {
     let container = useRef(null);
     let gui = useRef(null);
@@ -26,33 +30,20 @@ export const ThreeSceneRobot = memo(() => {
     useEffect(() => {
         initialize();
         animate();
-        document.addEventListener("click", onMouseClick);
-
-        return () => {
-            if (container.current) {
-                container.current.removeChild(renderer.current.domElement);
-            }
-        };
+        addClickEventListener(onMouseClick)
     }, []);
-    useEffect(() => {
-        // if (model.current) {
-        //     model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
-        // }
-    }, [modelPosition]);
-
-
 
     const initialize =  async () => {
         container.current = document.getElementById("robot-canvas");
         scene.current = initializeScene()
         camera.current = perspectiveCamera
+        renderer.current = initializeRenderer()
         clock.current = new THREE.Clock();
+        addWindowResizeEventListener(camera.current, renderer.current)
 
         await addRobot()
 
 
-        renderer.current = initializeRenderer()
-        window.addEventListener("resize", onWindowResize);
         container.current.appendChild(renderer.current.domElement);
 
 
@@ -64,18 +55,13 @@ export const ThreeSceneRobot = memo(() => {
         container.current.appendChild(stats.current.dom);
     };
     const addRobot = async () => {
-        const modelTmp = await createRobot()
+        const {robot, action} = await createRobotAndPlaceAt(scene.current)
+        const modelTmp = robot
+        modelTmp.matrixAutoUpdate = false
         model.current = [...model.current, modelTmp]
-        scene.current.add(modelTmp)
 
+        console.log(robot, action);
     }
-    const onWindowResize = () => {
-        camera.current.aspect = window.innerWidth / window.innerHeight;
-        camera.current.updateProjectionMatrix();
-
-        if (renderer.current) renderer.current.setSize(window.innerWidth, window.innerHeight);
-
-    };
 
     const createGUI = (model, animations) => {
         const states = [ "Idle", "Walking", "Running", "Dance", "Death", "Sitting", "Standing" ];
@@ -171,7 +157,7 @@ export const ThreeSceneRobot = memo(() => {
 
         if (stats.current) stats.current.update();
     };
-    const onMouseClick = (event) => {
+    const onMouseClick = () => {
         setModelPosition((prevPosition) => ({
             x: prevPosition.x, // Adjust the position change as needed
             y: prevPosition.y,

@@ -18,7 +18,8 @@
     "sass-loader": "^13.3.2",
     "three": "^0.158.0",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "yuka": "^0.7.8"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -1,0 +1,2 @@
+export const states = { Idle: "Idle", Walking: "Walking", Running: "Running", Dance: "Dance", Death: "Death", Sitting: "Sitting", Standing: "Standing" }
+export const emotes = { Jump: "Jump", Yes: "Yes", No: "No", Wave: "Wave", Punch: "Punch", ThumbsUp: "ThumbsUp" }
