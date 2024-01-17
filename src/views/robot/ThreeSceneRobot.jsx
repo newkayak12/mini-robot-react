@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import Stats from "three/addons/libs/stats.module.js";
+// import { OrbitControls } from "three/addons";
 
 const ThreeSceneRobot = () => {
     let container = useRef(null);
@@ -12,6 +13,7 @@ const ThreeSceneRobot = () => {
     let scene = useRef(null);
     let renderer = useRef(null);
     let model = useRef(null);
+    let grid = useRef(null);
     let face = useRef(null);
     let mixer = useRef(null);
     let actions = useRef({});
@@ -35,17 +37,21 @@ const ThreeSceneRobot = () => {
     }, []);
 
     useEffect(() => {
+        // console.log("1::", model?.current?.position);
+        // console.log("2::", modelPosition)
         if (model.current) {
+            console.log("current position::", model.current?.position); // 현재 위치
+            console.log("future position::", modelPosition) // 이동할 위치
             model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
+            console.log("2::", grid.current) // 이동할 위치
         }
-    }, [modelPosition]);
+
+    }, [ modelPosition ]);
 
 
     const init = () => {
         container.current = document.createElement("div");
         document.body.appendChild(container.current);
-
-
 
         camera.current = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 100);
         camera.current.position.set(20, 30, 50); // 일단 냅두기?
@@ -54,6 +60,8 @@ const ThreeSceneRobot = () => {
 
         scene.current = new THREE.Scene();
         scene.current.background = new THREE.Color(0xe0e0e0);
+        // new OrbitControls(camera, renderer.domElement);
+
         // scene.current.fog = new THREE.Fog(0xe0e0e0, 20, 100);
 
         clock.current = new THREE.Clock();
@@ -67,16 +75,12 @@ const ThreeSceneRobot = () => {
         dirLight.position.set(0, 20, 10);
         scene.current.add(dirLight);
 
-        // const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshPhongMaterial({
-        //     color: 0xcbcbcb, depthWrite: false,
-        // }));
-        // mesh.rotation.x = -Math.PI / 2;
-        // scene.current.add(mesh);
 
-        const grid = new THREE.GridHelper(200, 40, 0x000000, 0x000000);
-        grid.material.opacity = 0.2;
-        grid.material.transparent = true;
-        scene.current.add(grid);
+        // MARK: 바닥
+        grid.current = new THREE.GridHelper(200, 40, 0x000000, 0x000000);
+        grid.current.material.opacity = 0.2;
+        grid.current.material.transparent = true;
+        scene.current.add(grid.current);
 
         const loader = new GLTFLoader();
         const filePath = "/models/RobotExpressive.glb";
@@ -84,7 +88,9 @@ const ThreeSceneRobot = () => {
             model.current = gltf.scene;
             scene.current.add(model.current);
 
-            createGUI(model.current, gltf.animations);
+            // createGUI(model.current, gltf.animations);
+            // new OrbitControls(camera, renderer.domElement);
+
             if (model.current) {
                 model.current.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
             }
@@ -96,9 +102,8 @@ const ThreeSceneRobot = () => {
 
         renderer.current = new THREE.WebGLRenderer({antialias: true});
         // renderer.current.setPixelRatio(window.devicePixelRatio);
-        renderer.current.setSize(window.innerWidth, window.innerHeight);
+        renderer.current.setSize(window.innerWidth, window.innerHeight- 100);
         container.current.appendChild(renderer.current.domElement);
-
 
 
         window.addEventListener("resize", onWindowResize);
@@ -180,8 +185,6 @@ const ThreeSceneRobot = () => {
 
         expressionFolder.open();
     };
-
-
     const fadeToAction = (name, duration) => {
         previousAction.current = activeAction.current;
         activeAction.current = actions.current[name];
@@ -215,16 +218,78 @@ const ThreeSceneRobot = () => {
     };
 
 
+    // const onMouseClick = () => {
+    //     console.log("1 ", grid.current)
+    //     setModelPosition(prevPosition => ({x: prevPosition.x, y: prevPosition.y, z: prevPosition.z + 5}));
+    // };
+
+
+    // const onMouseClick = (event) => {
+    //
+    //     const mouseX = (event.clientX / window.innerWidth) * 2 - 1
+    //     const mouseY = -(event.clientY / window.innerHeight) * 2 + 1
+    //
+    //     const raycaster = new THREE.Raycaster();
+    //     raycaster.setFromCamera({ x: mouseX, y: mouseY }, camera.current);
+    //
+    //     const intersects = raycaster.intersectObjects([grid.current], true);
+    //
+    {/*    if (intersects.length > 0) {*/}
+    //         const intersectionPoint = intersects[0].point;
+    //         setModelPosition({
+    //             x: intersectionPoint.x,
+    //             y: intersectionPoint.y,
+    //             z: intersectionPoint.z,
+    //         });
+    //     }
+    // };
+
+    // const onMouseClick = (event) => {
+    //     // 목표.
+    //     // 1. mouse click 시
+    //     const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    //     const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    //
+    //     const mouseVector = new THREE.Vector3(mouseX, mouseY, 0.5);
+    //     mouseVector.unproject(camera.current);
+    //     const raycaster = new THREE.Raycaster(camera.current.position, mouseVector.sub(camera.current.position).normalize());
+    //     const intersects = raycaster.intersectObjects([grid.current], true);
+    //
+    {/*    if (intersects.length > 0) {*/}
+    //         const intersectionPoint = intersects[0].point;
+    //         setModelPosition({
+    //             x: intersectionPoint.x,
+    //             y: intersectionPoint.y,
+    //             z: intersectionPoint.z,
+    //         });
+    //     }
+    // };
+
     const onMouseClick = (event) => {
-        setModelPosition((prevPosition) => ({
-            x: prevPosition.x, // Adjust the position change as needed
-            y: prevPosition.y,
-            z: prevPosition.z + 5,
-        }));
-        console.log("Clicked:: ", modelPosition)
-        // scene.current.add(model.current);
-        // renderer.current.render(scene.current, camera.current);
+        // Get mouse coordinates
+        const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Create a raycaster
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera({ x: mouseX, y: mouseY }, camera.current);
+
+        // Find intersections with the grid
+        const intersects = raycaster.intersectObject(grid.current);
+
+        if (intersects.length > 0) {
+            // Get the intersection point
+            const intersectionPoint = intersects[0].point;
+
+            // Set the model's position to the intersection point on the grid
+            setModelPosition({
+                x: Math.floor(intersectionPoint.x),
+                y: Math.floor(intersectionPoint.y),
+                z: Math.floor(intersectionPoint.z), // You may adjust this based on your requirements
+            });
+        }
     };
+
 
     return <></>;
 
